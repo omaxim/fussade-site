@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fussade — Olomouc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+  <script type="module" crossorigin src="/assets/index-F5mcLfUc.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-C-GpkEn-.css">
+</head>
+<body>
+<div id="gate" hidden>
+  <form>
+    <input id="gate-pw" type="password" placeholder="Passphrase" autocomplete="current-password">
+    <button type="submit">Enter</button>
+    <p id="gate-err" hidden></p>
+  </form>
+</div>
+
+<header class="topbar">
+  <span class="wordmark">Fussade</span>
+  <span id="mode" class="pill"><span class="dot"></span>Demo</span>
+  <button id="lock" hidden>Lock</button>
+</header>
+
+<article id="story">
+  <h1>Where Olomouc's buildings are likely to waste the most energy</h1>
+  <p class="dek">Every building in the city, coloured by its most probable energy class, or by the median of its modelled energy performance. Click a building to see the evidence: the Street View facade and the orthophoto with the camera's field of view.</p>
+
+  <div id="search">
+    <input id="q" type="search" placeholder="Search an Olomouc address or street" autocomplete="off">
+    <ul id="q-list" role="listbox" hidden></ul>
+  </div>
+
+  <div id="legend">
+    <div class="legend-title">
+      <label for="indicator">Indicator</label>
+      <select id="indicator">
+        <option value="delivered">total delivered energy</option>
+        <option value="heating">delivered energy for heating</option>
+        <option value="primary">primary non-renewable energy</option>
+      </select>
+      <div class="switch" role="group" aria-label="Colour by">
+        <button type="button" class="pill-btn" data-mode="class" aria-pressed="true">most probable class</button>
+        <button type="button" class="pill-btn" data-mode="median" aria-pressed="false">posterior median</button>
+      </div>
+      <span class="badge">demo posterior</span></div>
+    <div id="legend-ramp">
+      <div class="legend-bar"></div>
+      <div class="legend-ticks"><span>60</span><span>120</span><span>170</span><span>230</span><span>320+</span></div>
+    </div>
+    <div id="legend-classes" hidden></div>
+    <div id="legend-what" class="legend-what"></div>
+  </div>
+
+  <div id="mapwrap">
+    <div id="map"></div>
+    <div id="count" class="count"></div>
+  </div>
+
+  <p class="source">Buildings: RÚIAN (ČÚZK), <span id="n-src"></span> footprints · Posterior: Slovenia-trained model in Czech methodology definitions (fussade) — <b id="src-provenance">demo values in this prototype</b> · Basemap © OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors · Orthophoto © ČÚZK · Street View © Google, loaded on click.</p>
+
+  <section id="bridge">
+    <h2>How the two methodologies were linked</h2>
+    <p class="dek">A Slovenian certificate and a Czech one do not measure the same thing: a different reference floor area, a local climate against one reference year, other ventilation and temperature assumptions, other hot-water and lighting defaults, and a different rule for a heat pump's ambient heat. Before training, every Slovenian certificate value was re-expressed in the Czech definitions from the two methodology texts alone: PURES 2010 with TSG-1-004 and TSG-2022 on one side, vyhláška 264/2020 with ČSN 73 0331-1 on the other. Below, that chain for the median building of a chosen kind and era. Pick one and hover a step.</p>
+    <div id="bridge-root" class="bridge-root"></div>
+    <p class="source">Medians of the Slovenian register per group, passed through the same code that built the training targets (fussade.transpose). The chain is exact for that median building; per building the factors depend on era, kind and the building's own system efficiency.</p>
+  </section>
+
+  <section id="validation">
+    <h2>How good is the model, and where does it come from</h2>
+    <p class="dek">Trained on the Slovenian energy-certificate register only, on cadastral attributes every Czech building also has: year, storeys, footprint, construction, use, climate. Its targets were re-expressed in Czech definitions from the two national methodologies alone; how that is done is shown below. What it outputs is a posterior distribution per building, not a number. Below, that posterior against the certificate value on Slovenian buildings the model never saw in training: each column is the stacked posterior of every building whose certificate falls in that band, so a column reads as <em>p(prediction | certificate value)</em>. The dashed line is perfect agreement. Hover for the numbers.</p>
+    <div id="val-root" class="val-root"></div>
+    <p class="source">Slovenian held-out test split, total delivered energy, registers only.</p>
+  </section>
+</article>
+
+<aside id="panel" hidden>
+  <div class="panel-head">
+    <div>
+      <div id="p-title">—</div>
+      <div id="p-sub" class="muted">—</div>
+    </div>
+    <button id="p-close" title="close (Esc)">×</button>
+  </div>
+
+  <div class="pair" id="pair">
+    <figure class="cell">
+      <div class="frame">
+        <img id="sv-img" alt="Street View facade, the frame the model was scored on" hidden>
+        <iframe id="sv" referrerpolicy="no-referrer-when-downgrade" allowfullscreen loading="lazy" title="Google Street View"></iframe>
+        <div id="sv-msg" class="overlay-msg" hidden></div>
+      </div>
+      <figcaption>
+        <span id="sv-cap">Street View</span>
+        <span class="sv-actions"><button id="sv-mode" type="button" hidden>explore ↔</button><a id="sv-link" target="_blank" rel="noopener">open in Google Maps ↗</a></span>
+      </figcaption>
+    </figure>
+    <figure class="cell">
+      <div class="frame"><canvas id="roof" width="640" height="640"></canvas><div id="roof-msg" class="overlay-msg" hidden></div></div>
+      <figcaption><span id="roof-cap">ČÚZK ortofoto, latest epoch, with the camera's field of view</span><span class="muted">© ČÚZK</span></figcaption>
+    </figure>
+  </div>
+
+  <section class="card" id="post-card">
+    <div class="card-head"><span>Posterior · delivered energy, kWh/m²a</span><span id="post-badge" class="badge">demo</span></div>
+    <canvas id="density" width="640" height="180"></canvas>
+    <div id="post-stats" class="muted"></div>
+  </section>
+
+  <section class="card" id="classes">
+    <div class="card-head"><span>Modelled class · by ratio to this building's reference building (264/2020)</span><span id="classes-badge" class="badge">demo</span></div>
+    <div id="class-rows"></div>
+  </section>
+
+  <section class="card" id="rank">
+    <div class="card-head"><span>Standing in Olomouc · by posterior median</span><span id="rank-badge" class="badge">demo</span></div>
+    <div id="rank-strip" title="ten equal-count bins of all buildings on the map, best on the left"></div>
+    <div id="rank-text" class="muted"></div>
+  </section>
+
+  <section class="card attrs" id="attrs"></section>
+  <div class="muted hint">← → step through buildings with a Street View plan · Esc closes</div>
+</aside>
+
+</body>
+</html>
